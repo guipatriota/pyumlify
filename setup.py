@@ -15,7 +15,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "pyumlify=pyumlify.generate:main"
+            "pyumlify=pyumlify.cli:main"
         ]
     },
     classifiers=[
