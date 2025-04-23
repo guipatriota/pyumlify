@@ -1,6 +1,4 @@
 import subprocess
-import os
-import shutil
 
 def test_cli_runs(tmp_path):
     """Test basic CLI execution and output generation."""
@@ -11,6 +9,6 @@ def test_cli_runs(tmp_path):
         text=True
     )
 
-    assert result.returncode == 0
+    assert result.returncode == 0, result.stderr
     assert out_dir.exists()
-    assert any(f.name.endswith(".puml") for f in out_dir.iterdir())
+    assert any(f.suffix == ".puml" for f in out_dir.iterdir())
