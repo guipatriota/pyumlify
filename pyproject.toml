@@ -1,3 +1,17 @@
+[project]
+name = "pyumlify"
+version = "0.1.0"
+description = "Generate PlantUML diagrams from Python code automatically."
+authors = ["Guilherme Patriota <guipatriota@example.com>"]
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+  "stdlib_list"
+]
+
+[project.scripts]
+pyumlify = "pyumlify.generate:main"
+
 [build-system]
 requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
