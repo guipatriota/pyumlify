@@ -1,4 +1,3 @@
-import os
 from pyumlify.generate import extract_structure, scan_project, get_known_external_modules
 
 def test_extract_structure():
@@ -14,4 +13,6 @@ def test_scan_project():
 
 def test_detect_external_libs_from_requirements():
     libs = get_known_external_modules("tests/fixtures/requirements.txt")
-    assert "requests" in libs or "flask" in libs
+    assert "requests" in libs
+    assert "numpy" in libs
+    assert "pypdf2" in libs or "PyPDF2".lower() in libs
