@@ -1,11 +1,12 @@
+
+
+![PyUMLify Banner](https://raw.githubusercontent.com/guipatriota/pyumlify/main/assets/banner.png)
+
 # PyUMLify
 
 **Automatically generate UML class and package diagrams from your Python project using PlantUML.**
 
 **PyUMLify** is a lightweight Python tool that scans your project's source code and automatically generates PlantUML class and package diagrams. It's designed to improve documentation and architecture visibility in any Python-based project — whether it's a microservice, CLI, library, or monolith.
-
-
-![PyUMLify Banner](https://raw.githubusercontent.com/guipatriota/pyumlify/main/assets/banner.png)
 
 ---
 
