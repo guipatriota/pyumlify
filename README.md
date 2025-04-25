@@ -1,79 +1,81 @@
-# pyumlify 🧩📦
+# PyUMLify
 
-**Automatically generate PlantUML diagrams from your Python codebase.**
+**Automatically generate UML class and package diagrams from your Python project using PlantUML.**
 
-**pyumlify** is a lightweight Python tool that scans your project's source code and automatically generates PlantUML class and package diagrams. It's designed to improve documentation and architecture visibility in any Python-based project — whether it's a microservice, CLI, library, or monolith.
+**PyUMLify** is a lightweight Python tool that scans your project's source code and automatically generates PlantUML class and package diagrams. It's designed to improve documentation and architecture visibility in any Python-based project — whether it's a microservice, CLI, library, or monolith.
+
+
+![PyUMLify Banner](https://raw.githubusercontent.com/guipatriota/pyumlify/main/assets/banner.png)
 
 ---
 
-## 🔧 Installation
+## ✨ What is it?
+
+**PyUMLify** scans your Python project to identify classes, methods, and their relationships, and then generates `.puml` files ready to be rendered with [PlantUML](https://plantuml.com/).
+
+## 🚀 Installation
+
 ```bash
-pip install git+https://github.com/guipatriota/pyumlify.git
+pip install pyumlify
 ```
 
----
+Or, if you're developing or testing locally:
 
-## 🚀 Usage
 ```bash
-pyumlify --root src --output diagrams
+git clone https://github.com/guipatriota/pyumlify.git
+cd pyumlify
+pip install -e .
 ```
 
-Options:
-- `--root`: Directory where your `.py` files are located (default: `.`)
-- `--output`: Directory where `.puml` files will be saved (default: `./plantuml_output`)
-- `--requirements`: Path to `requirements.txt` (default: `requirements.txt`)
-- `--clear`: (optional) Delete previous `.puml` files in output folder before generating
+## 🛠️ Usage
 
-## 📁 Output
-- One `.puml` per package/module
-- A `packages.puml` diagram with inter-package dependencies
-
-## 📌 Example
 ```bash
-pyumlify --root my_project --output docs/uml
+pyumlify --root . --output plantuml_output
 ```
 
-Then render with [PlantUML](https://plantuml.com/):
+Optional flags:
+
+- `--requirements`: path to your `requirements.txt` (default is `requirements.txt`)
+- `--include`: extra external libraries to ignore (e.g. `--include pandas numpy`)
+- `--clear`: remove the output directory before generating
+- `--force`: overwrite `.puml` files even if they already exist
+
+Example:
+
 ```bash
-plantuml docs/uml/*.puml
+pyumlify --root src/ --output uml/ --requirements requirements.txt --include pandas numpy --force
 ```
 
-## 🧪 Run Tests
+## 📦 Output
+
+- One `.puml` file per package/module
+- A `packages.puml` showing the relationships between modules
+
+You can visualize the diagrams using:
+
+- [PlantUML](https://plantuml.com/)
+- [VSCode Plugin](https://marketplace.visualstudio.com/items?itemName=jebbs.plantuml)
+- Any tool that supports `.puml` rendering
+
+## 📌 Features
+
+- 📂 Supports large Python projects with nested folders
+- 📚 Detects class dependencies and method return types
+- 🧠 Ignores standard libraries and known third-party packages
+- 💡 Highlighted themes and class formatting included
+
+## 🧪 Testing
+
+Run all tests using:
+
 ```bash
-pytest tests/
+pytest
 ```
----
 
-## 🚀 Features
+## 📄 License
 
-- 📁 Scans all `.py` files in your project, including modules at the root level.
-- 🔍 Detects classes, methods, attributes, and inter-class dependencies.
-- 📦 Builds a complete `packages.puml` diagram showing real `import` relationships between packages.
-- 📄 Generates one `.puml` file per package/module containing only relevant classes (Class diagrams and Full Package Diagram).
-- ✨ Ignores external libraries (via `requirements.txt` + `stdlib_list` + `importlib.metadata`) unless they contain project-specific classes.
-- ❌ Skips `__init__` methods for cleaner class diagrams.
-- 🎨 Uses a customizable PlantUML theme (Dracula by default).
-- 🧠 Works out of the box, no need to modify your codebase.
+GPL3.0 License. See `LICENSE` file for details.
 
 ---
 
-## 📦 Use Cases
-
-- Quickly visualize the structure of legacy code
-- Generate architecture documentation for team onboarding
-- Validate modularity and coupling in large codebases
-- Create visuals for technical reports and system design docs
-
----
-
-## 🛠 Requirements
-
-- Python 3.8+
-- `stdlib_list` (`pip install stdlib_list`)
-- (Optional) PlantUML viewer/editor like [PlantUML Online](https://plantuml.com/), VSCode plugin, or IntelliJ plugin.
-
----
-
-## 📜 License
-This project is licensed under the GNU General Public License v3.0 (GPL-3.0).  
-See the [LICENSE](./LICENSE) file for details.
+Made with ❤️ by [Guilherme Ditzel Patriota](https://github.com/guipatriota)

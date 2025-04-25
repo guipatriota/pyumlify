@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Generate PlantUML diagrams from Python code automatically."
 readme = "README.md"
 requires-python = ">=3.8"
-license = "GPL-3.0-or-later"
+license = {text = "GPL-3.0-or-later"}
 keywords = [
   "plantuml",
   "uml",
@@ -24,3 +24,9 @@ dependencies = ["stdlib_list"]
 
 [project.scripts]
 pyumlify = "pyumlify.cli:main"
+
+[tool.setuptools]
+packages = ["pyumlify"]
+
+[tool.setuptools.package-data]
+pyumlify = ["*.py"]
