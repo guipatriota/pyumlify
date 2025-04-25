@@ -1,7 +1,9 @@
+__all__ = [
+    "scan_project", "generate_plantuml_files", "get_known_external_modules"
+]
+
 import os
 import ast
-import shutil
-import argparse
 from pathlib import Path
 import importlib.metadata
 from collections import defaultdict
@@ -41,14 +43,18 @@ def get_known_external_modules(requirements_path):
     stdlib_modules = {mod.lower().replace("-", "_") for mod in stdlib_list()}
     req_modules = load_external_libraries_from_requirements(requirements_path)
     top_level_imports = get_top_level_imports()
-    return stdlib_modules.union(req_modules).union(top_level_imports)
+    problematic_modules = {"PyPDF2"}
+    return stdlib_modules.union(req_modules).union(top_level_imports).union(problematic_modules)
 
 def extract_structure(filepath):
     try:
         with open(filepath, "r", encoding="utf-8") as f:
             source = f.read()
         tree = ast.parse(source, filename=filepath)
-    except (SyntaxError, UnicodeDecodeError):
+    except SyntaxError as e:
+        print(f"⚠️ Skipping file due to syntax error: {filepath} ({e})")
+        return None
+    except UnicodeDecodeError:
         return None
 
     result = {
@@ -124,8 +130,30 @@ def detect_dependencies(cls, all_class_names):
             deps.add(ret)
     return deps
 
-def generate_plantuml_files(project_data, root_dir=".", output_dir="./plantuml_output", external_libs=None):
-    os.makedirs(output_dir, exist_ok=True)
+def clean_dependencies(dependencies, external_libs):
+    cleaned = {}
+    for from_pkg, to_pkgs in dependencies.items():
+        if from_pkg in external_libs:
+            continue
+        cleaned_to_pkgs = {pkg for pkg in to_pkgs if pkg not in external_libs}
+        if cleaned_to_pkgs:
+            cleaned[from_pkg] = cleaned_to_pkgs
+    return cleaned
+
+def clean_package_classes(package_classes, external_libs):
+    cleaned = {}
+    for pkg, classes in package_classes.items():
+        if pkg in external_libs:
+            continue
+        cleaned[pkg] = classes
+    return cleaned
+
+def generate_plantuml_files(project_data, root_dir=".", output_dir="./plantuml_output", external_libs=None, force=False):
+    try:
+        os.makedirs(output_dir, exist_ok=True)
+    except PermissionError:
+        print(f"❌ Permission denied to create or write to output directory: {output_dir}")
+        exit(1)
     package_classes = defaultdict(list)
     class_to_package = {}
     all_class_names = set()
@@ -157,8 +185,17 @@ def generate_plantuml_files(project_data, root_dir=".", output_dir="./plantuml_o
             if imp != pkg:
                 dependencies[pkg].add(imp)
 
+    # Clean dependencies
+    dependencies = clean_dependencies(dependencies, external_libs)
+   
+    # Clean package_classes
+    package_classes = clean_package_classes(package_classes, external_libs)
+    
     for package, classes in package_classes.items():
         if not classes and external_libs and package in external_libs:
+            continue
+        if os.path.exists(os.path.join(output_dir, f"{package}.puml")) and not force:
+            print(f"⚠️  File {package}.puml already exists. Use --force to overwrite.")
             continue
         with open(os.path.join(output_dir, f"{package}.puml"), "w", encoding="utf-8") as f:
             f.write(f"@startuml {package}\n")
@@ -177,6 +214,11 @@ def generate_plantuml_files(project_data, root_dir=".", output_dir="./plantuml_o
                 f.write("}\n\n")
             f.write("@enduml\n")
 
+        print(f"✅ Created {len(classes)} classes in '{package}.puml'")
+
+    if os.path.exists(os.path.join(output_dir, "packages.puml")) and not force:
+        print(f"⚠️  File packages.puml already exists. Use --force to overwrite.")
+        return
     with open(os.path.join(output_dir, "packages.puml"), "w", encoding="utf-8") as f:
         f.write("@startuml packages\n")
         f.write("!include https://raw.githubusercontent.com/guipatriota/dracula-plantuml-theme/v1.0.0/theme.puml\n")
@@ -193,24 +235,4 @@ def generate_plantuml_files(project_data, root_dir=".", output_dir="./plantuml_o
                     continue
                 f.write(f"{from_pkg} --> {to_pkg}\n")
         f.write("@enduml\n")
-
-# CLI
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Generate PlantUML diagrams for a Python project.")
-    parser.add_argument("--root", type=str, default=".", help="Root directory of the Python project.")
-    parser.add_argument("--output", type=str, default="./plantuml_output", help="Directory to store .puml files.")
-    parser.add_argument("--requirements", type=str, default="requirements.txt", help="Path to requirements.txt")
-    parser.add_argument("--include", type=str, nargs="*", default=[], help="Additional libs to ignore (e.g. PyPDF2)")
-
-    args = parser.parse_args()
-
-    root_dir = args.root
-    output_dir = args.output
-    external_libs = get_known_external_modules(args.requirements)
-    for lib in args.include:
-        external_libs.add(lib.lower())
-
-    project_data = scan_project(root_dir)
-    generate_plantuml_files(project_data, root_dir=root_dir, output_dir=output_dir, external_libs=external_libs)
+        print(f"✅ Created {len(package_classes)} packages in 'packages.puml'")
